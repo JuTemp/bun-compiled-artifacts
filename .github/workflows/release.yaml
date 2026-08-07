@@ -1,13 +1,36 @@
 name: Build and Release with Docker
 
 on:
+  schedule:
+    - cron: '12 */2 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/oven/bun:latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - id: check
+        run: |
+          version=$(bun -v)
+
+          if gh release view "${version}" >/dev/null 2>&1; then
+            echo "Release ${version} already exists. Skipping build."
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Release ${version} does not exist. Proceeding with build."
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
   amd64-glibc:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     container:
       image: docker.io/oven/bun:latest
@@ -60,6 +83,8 @@ jobs:
           path: /app/bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
 
   amd64-musl:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     container:
       image: docker.io/oven/bun:alpine
@@ -111,8 +136,8 @@ jobs:
 
   publish-release:
     runs-on: ubuntu-latest
-    needs: [amd64-glibc, amd64-musl]
-
+    needs: [check-changes, amd64-glibc, amd64-musl]
+    if: needs.check-changes.outputs.has_changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
