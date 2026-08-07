@@ -8,6 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker.io/oven/bun:latest
+    outputs:
+      AMD64_GLIBC_BUN_VERSION: ${{ steps.get-version.outputs.AMD64_GLIBC_BUN_VERSION }}
+      AMD64_GLIBC_INDEX_DIGEST: ${{ steps.get-digest.outputs.AMD64_GLIBC_INDEX_DIGEST }}
+      AMD64_GLIBC_MANIFEST_DIGEST: ${{ steps.get-digest.outputs.AMD64_GLIBC_MANIFEST_DIGEST }}
 
     steps:
       - name: Install curl
@@ -16,6 +20,7 @@ jobs:
           apt-get install -y curl ca-certificates jq
 
       - name: Checkout Digest
+        id: get-digest
         run: |
           owner=oven
           repo=bun
@@ -29,9 +34,11 @@ jobs:
           echo "AMD64_GLIBC_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
 
       - name: Compile project
+        id: get-version
         run: |
           version=$(bun -v)
-          echo BUN_VERSION=${version} >> $GITHUB_ENV
+          echo "BUN_VERSION=${version}" >> $GITHUB_ENV
+          echo "AMD64_GLIBC_BUN_VERSION=${version}" >> $GITHUB_OUTPUT
 
           bun init -y
           bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-glibc
@@ -46,12 +53,17 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker.io/oven/bun:alpine
+    outputs:
+      AMD64_MUSL_BUN_VERSION: ${{ steps.get-version.outputs.AMD64_MUSL_BUN_VERSION }}
+      AMD64_MUSL_INDEX_DIGEST: ${{ steps.get-digest.outputs.AMD64_MUSL_INDEX_DIGEST }}
+      AMD64_MUSL_MANIFEST_DIGEST: ${{ steps.get-digest.outputs.AMD64_MUSL_MANIFEST_DIGEST }}
 
     steps:
       - name: Install curl
         run: apk add --no-cache curl ca-certificates jq
 
       - name: Checkout Digest
+        id: get-digest
         run: |
           owner=oven
           repo=bun
@@ -65,6 +77,7 @@ jobs:
           echo "AMD64_MUSL_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
 
       - name: Compile project
+        id: get-version
         run: |
           version=$(bun -v)
           echo BUN_VERSION=${version} >> $GITHUB_ENV
@@ -95,14 +108,14 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.BUN_VERSION }}
+          tag_name: ${{ needs.amd64-glibc.outputs.AMD64_GLIBC_BUN_VERSION }}
           files: dist/*
           body: |
-            # bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
+            # bun-${{ needs.amd64-glibc.outputs.AMD64_GLIBC_BUN_VERSION }}-compiled-amd64-glibc
             Amd64-glibc Index Digest: ${{ needs.amd64-glibc.outputs.AMD64_GLIBC_INDEX_DIGEST }}
             Amd64-glibc Manifest Digest: ${{ needs.amd64-glibc.outputs.AMD64_GLIBC_MANIFEST_DIGEST }}
 
-            # bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
+            # bun-${{ needs.amd64-musl.outputs.AMD64_MUSL_BUN_VERSION }}-compiled-amd64-musl
             Amd64-musl Index Digest: ${{ needs.amd64-musl.outputs.AMD64_MUSL_INDEX_DIGEST }}
             Amd64-musl Manifest Digest: ${{ needs.amd64-musl.outputs.AMD64_MUSL_MANIFEST_DIGEST }}
         env:
