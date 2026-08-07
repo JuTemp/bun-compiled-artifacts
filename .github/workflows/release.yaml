@@ -3,6 +3,9 @@ name: Build and Release with Docker
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   amd64-glibc:
     runs-on: ubuntu-latest
