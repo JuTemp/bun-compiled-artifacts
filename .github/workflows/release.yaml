@@ -10,6 +10,9 @@ jobs:
       image: docker.io/oven/bun:latest
 
     steps:
+      - name: Install curl
+        run: apk add --no-cache curl ca-certificates
+
       - name: Checkout Digest
         run: |
           owner=oven
@@ -22,7 +25,7 @@ jobs:
 
           echo "AMD64_GLIBC_INDEX_DIGEST=$(jq -r .digest ${output})" >> $GITHUB_OUTPUT
           echo "AMD64_GLIBC_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
-      
+
       - name: Compile project
         run: |
           version=$(bun -v)
@@ -43,6 +46,11 @@ jobs:
       image: docker.io/oven/bun:alpine
 
     steps:
+      - name: Install curl
+        run: |
+          apt-get update
+          apt-get install -y curl ca-certificates
+
       - name: Checkout Digest
         run: |
           owner=oven
@@ -55,7 +63,7 @@ jobs:
 
           echo "AMD64_MUSL_INDEX_DIGEST=$(jq -r .digest ${output})" >> $GITHUB_OUTPUT
           echo "AMD64_MUSL_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
-  
+
       - name: Compile project
         run: |
           version=$(bun -v)
