@@ -11,7 +11,9 @@ jobs:
 
     steps:
       - name: Install curl
-        run: apk add --no-cache curl ca-certificates
+        run: |
+          apt-get update
+          apt-get install -y curl ca-certificates
 
       - name: Checkout Digest
         run: |
@@ -47,9 +49,7 @@ jobs:
 
     steps:
       - name: Install curl
-        run: |
-          apt-get update
-          apt-get install -y curl ca-certificates
+        run: apk add --no-cache curl ca-certificates
 
       - name: Checkout Digest
         run: |
