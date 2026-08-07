@@ -43,7 +43,7 @@ jobs:
           echo "BUN_VERSION=${version}" >> $GITHUB_ENV
           echo "AMD64_GLIBC_BUN_VERSION=${version}" >> $GITHUB_OUTPUT
 
-          bun init -y
+          echo 'console.log("Hello via Bun!");' > ./index.ts
           bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-glibc
 
       - name: Upload Artifact amd64-glibc
@@ -85,7 +85,7 @@ jobs:
           version=$(bun -v)
           echo BUN_VERSION=${version} >> $GITHUB_ENV
 
-          bun init -y
+          echo 'console.log("Hello via Bun!");' > ./index.ts
           bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-musl
 
       - name: Upload Artifact amd64-musl
