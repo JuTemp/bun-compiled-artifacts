@@ -48,7 +48,8 @@ jobs:
           mkdir /app
           cd /app
           echo 'console.log("Hello via Bun!");' > ./index.ts
-          bun build ./index.ts --compile --outfile ./bun-${version}-compiled-amd64-glibc
+          bun build ./index.ts --compile
+          mv ./index ./bun-${version}-compiled-amd64-glibc
 
           sha256sum ./bun-${version}-compiled-amd64-glibc
 
@@ -97,7 +98,8 @@ jobs:
           mkdir /app
           cd /app
           echo 'console.log("Hello via Bun!");' > ./index.ts
-          bun build ./index.ts --compile --outfile ./bun-${version}-compiled-amd64-musl
+          bun build ./index.ts --compile
+          mv ./index ./bun-${version}-compiled-amd64-musl
 
           sha256sum ./bun-${version}-compiled-amd64-musl
 
