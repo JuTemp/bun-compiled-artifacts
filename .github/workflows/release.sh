@@ -17,7 +17,7 @@ jobs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - name: Install GitHub CLI
-        run: apt update && apt install gh
+        uses: idx/gh-cli-action@v1
 
       - name: Check release version exists
         id: check
