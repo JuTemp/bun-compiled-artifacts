@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
-          path: bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
+          path: /app/bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
 
   amd64-musl:
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
-          path: bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
+          path: /app/bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
 
   publish-release:
     runs-on: ubuntu-latest
