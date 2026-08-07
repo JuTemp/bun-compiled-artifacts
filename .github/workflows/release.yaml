@@ -16,7 +16,8 @@ jobs:
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
-      - id: check
+      - name: Check release version exists
+        id: check
         run: |
           version=$(bun -v)
 
@@ -27,6 +28,8 @@ jobs:
             echo "Release ${version} does not exist. Proceeding with build."
             echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   amd64-glibc:
     needs: check-changes
