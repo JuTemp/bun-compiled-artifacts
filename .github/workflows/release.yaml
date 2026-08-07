@@ -19,6 +19,9 @@ jobs:
       - name: Install GitHub CLI
         run: apt-get update && apt-get install -y git gh
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check release version exists
         id: check
         run: |
