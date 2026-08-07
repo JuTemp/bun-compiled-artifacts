@@ -2,7 +2,7 @@ name: Build and Release with Docker
 
 on:
   schedule:
-    - cron: '12 */2 * * *'
+    - cron: "12 */2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,9 @@ jobs:
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
+      - name: Install GitHub CLI
+        uses: idx/gh-cli-action@v1
+
       - name: Check release version exists
         id: check
         run: |
