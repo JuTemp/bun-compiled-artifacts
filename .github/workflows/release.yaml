@@ -33,6 +33,8 @@ jobs:
 
           curl -s -o ${output} "https://hub.docker.com/v2/namespaces/${owner}/repositories/${repo}/tags/${tag}"
 
+          echo "AMD64_GLIBC_INDEX_DIGEST=$(jq -r .digest ${output})"
+          echo "AMD64_GLIBC_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})"
           echo "AMD64_GLIBC_INDEX_DIGEST=$(jq -r .digest ${output})" >> $GITHUB_OUTPUT
           echo "AMD64_GLIBC_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
 
@@ -43,8 +45,12 @@ jobs:
           echo "BUN_VERSION=${version}" >> $GITHUB_ENV
           echo "AMD64_GLIBC_BUN_VERSION=${version}" >> $GITHUB_OUTPUT
 
+          mkdir /app
+          cd /app
           echo 'console.log("Hello via Bun!");' > ./index.ts
-          bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-glibc
+          bun build ./index.ts --compile --outfile ./bun-${version}-compiled-amd64-glibc
+
+          sha256sum ./bun-${version}-compiled-amd64-glibc
 
       - name: Upload Artifact amd64-glibc
         uses: actions/upload-artifact@v4
@@ -76,6 +82,8 @@ jobs:
 
           curl -s -o ${output} "https://hub.docker.com/v2/namespaces/${owner}/repositories/${repo}/tags/${tag}"
 
+          echo "AMD64_MUSL_INDEX_DIGEST=$(jq -r .digest ${output})"
+          echo "AMD64_MUSL_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})"
           echo "AMD64_MUSL_INDEX_DIGEST=$(jq -r .digest ${output})" >> $GITHUB_OUTPUT
           echo "AMD64_MUSL_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
 
@@ -84,9 +92,14 @@ jobs:
         run: |
           version=$(bun -v)
           echo BUN_VERSION=${version} >> $GITHUB_ENV
+          echo "AMD64_MUSL_BUN_VERSION=${version}" >> $GITHUB_OUTPUT
 
+          mkdir /app
+          cd /app
           echo 'console.log("Hello via Bun!");' > ./index.ts
-          bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-musl
+          bun build ./index.ts --compile --outfile ./bun-${version}-compiled-amd64-musl
+
+          sha256sum ./bun-${version}-compiled-amd64-musl
 
       - name: Upload Artifact amd64-musl
         uses: actions/upload-artifact@v4
