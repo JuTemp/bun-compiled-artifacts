@@ -19,6 +19,9 @@ jobs:
       - name: Install GitHub CLI
         run: apt-get update && apt-get install -y git gh
 
+      - name: Trust Git Working Directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout
         uses: actions/checkout@v4
 
