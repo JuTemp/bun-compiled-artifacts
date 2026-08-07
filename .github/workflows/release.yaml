@@ -1,0 +1,100 @@
+name: Build and Release with Docker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  amd64-glibc:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/oven/bun:latest
+
+    steps:
+      - name: Checkout Digest
+        run: |
+          owner=oven
+          repo=bun
+          tag=latest
+
+          output=$(mktemp)
+
+          curl -s -o ${output} "https://hub.docker.com/v2/namespaces/${owner}/repositories/${repo}/tags/${tag}"
+
+          echo "AMD64_GLIBC_INDEX_DIGEST=$(jq -r .digest ${output})" >> $GITHUB_OUTPUT
+          echo "AMD64_GLIBC_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
+      
+      - name: Compile project
+        run: |
+          version=$(bun -v)
+          echo BUN_VERSION=${version} >> $GITHUB_ENV
+
+          bun init -y
+          bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-glibc
+
+      - name: Upload Artifact amd64-glibc
+        uses: actions/upload-artifact@v4
+        with:
+          name: bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
+          path: bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
+
+  amd64-musl:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/oven/bun:alpine
+
+    steps:
+      - name: Checkout Digest
+        run: |
+          owner=oven
+          repo=bun
+          tag=alpine
+
+          output=$(mktemp)
+
+          curl -s -o ${output} "https://hub.docker.com/v2/namespaces/${owner}/repositories/${repo}/tags/${tag}"
+
+          echo "AMD64_MUSL_INDEX_DIGEST=$(jq -r .digest ${output})" >> $GITHUB_OUTPUT
+          echo "AMD64_MUSL_MANIFEST_DIGEST=$(jq -r 'first(.images.[] | select(.architecture == "amd64")) | .digest' ${output})" >> $GITHUB_OUTPUT
+  
+      - name: Compile project
+        run: |
+          version=$(bun -v)
+          echo BUN_VERSION=${version} >> $GITHUB_ENV
+
+          bun init -y
+          bun build ./index.ts --compile --outfile bun-${version}-compiled-amd64-musl
+
+      - name: Upload Artifact amd64-musl
+        uses: actions/upload-artifact@v4
+        with:
+          name: bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
+          path: bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs: [amd64-glibc, amd64-musl]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          body: |
+            # bun-${{ env.BUN_VERSION }}-compiled-amd64-glibc
+            Amd64-glibc Index Digest: ${{ needs.amd64-glibc.outputs.AMD64_GLIBC_INDEX_DIGEST }}
+            Amd64-glibc Manifest Digest: ${{ needs.amd64-glibc.outputs.AMD64_GLIBC_MANIFEST_DIGEST }}
+
+            # bun-${{ env.BUN_VERSION }}-compiled-amd64-musl
+            Amd64-musl Index Digest: ${{ needs.amd64-musl.outputs.AMD64_MUSL_INDEX_DIGEST }}
+            Amd64-musl Manifest Digest: ${{ needs.amd64-musl.outputs.AMD64_MUSL_MANIFEST_DIGEST }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
