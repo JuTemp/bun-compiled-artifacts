@@ -21,7 +21,7 @@ jobs:
         run: |
           version=$(bun -v)
 
-          if gh release view "${version}" >/dev/null 2>&1; then
+          if gh release view "${version}"; then
             echo "Release ${version} already exists. Skipping build."
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
