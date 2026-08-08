@@ -47,10 +47,10 @@ jobs:
     container:
       image: docker.io/oven/bun:latest
     outputs:
-      AMD64_GLIBC_BUN_VERSION: ${{ steps.get-version.outputs.AMD64_GLIBC_BUN_VERSION }}
       AMD64_GLIBC_INDEX_DIGEST: ${{ steps.get-digest.outputs.AMD64_GLIBC_INDEX_DIGEST }}
       AMD64_GLIBC_MANIFEST_DIGEST: ${{ steps.get-digest.outputs.AMD64_GLIBC_MANIFEST_DIGEST }}
-      AMD64_GLIBC_SHA256_HASH: ${{ steps.get-digest.outputs.AMD64_GLIBC_SHA256_HASH }}
+      AMD64_GLIBC_BUN_VERSION: ${{ steps.get-version.outputs.AMD64_GLIBC_BUN_VERSION }}
+      AMD64_GLIBC_SHA256_HASH: ${{ steps.get-version.outputs.AMD64_GLIBC_SHA256_HASH }}
 
     steps:
       - name: Install curl
@@ -104,10 +104,10 @@ jobs:
     container:
       image: docker.io/oven/bun:alpine
     outputs:
-      AMD64_MUSL_BUN_VERSION: ${{ steps.get-version.outputs.AMD64_MUSL_BUN_VERSION }}
       AMD64_MUSL_INDEX_DIGEST: ${{ steps.get-digest.outputs.AMD64_MUSL_INDEX_DIGEST }}
       AMD64_MUSL_MANIFEST_DIGEST: ${{ steps.get-digest.outputs.AMD64_MUSL_MANIFEST_DIGEST }}
-      AMD64_MUSL_SHA256_HASH: ${{ steps.get-digest.outputs.AMD64_MUSL_SHA256_HASH }}
+      AMD64_MUSL_BUN_VERSION: ${{ steps.get-version.outputs.AMD64_MUSL_BUN_VERSION }}
+      AMD64_MUSL_SHA256_HASH: ${{ steps.get-version.outputs.AMD64_MUSL_SHA256_HASH }}
 
     steps:
       - name: Install curl
