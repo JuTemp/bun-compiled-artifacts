@@ -87,7 +87,7 @@ jobs:
           bun build ./index.ts --compile
           mv ./index ./bun-${version}-compiled-amd64-glibc
 
-          hash=$(sha256sum ./bun-${version}-compiled-amd64-glibc)
+          hash=$(sha256sum ./bun-${version}-compiled-amd64-glibc | cut -d ' ' -f 1)
           echo "SHA256 Hash: ${hash}"
           echo "AMD64_GLIBC_SHA256_HASH=${hash}" >> $GITHUB_OUTPUT
 
@@ -142,7 +142,7 @@ jobs:
           bun build ./index.ts --compile
           mv ./index ./bun-${version}-compiled-amd64-musl
 
-          hash=$(sha256sum ./bun-${version}-compiled-amd64-musl)
+          hash=$(sha256sum ./bun-${version}-compiled-amd64-musl | cut -d ' ' -f 1)
           echo "SHA256 Hash: ${hash}"
           echo "AMD64_MUSL_SHA256_HASH=${hash}" >> $GITHUB_OUTPUT
 
